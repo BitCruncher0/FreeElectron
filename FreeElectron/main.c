@@ -42,7 +42,7 @@ double volumeCylinder(double radius, double length)
 }
 
 
-int queryPositiveInt(const char *query, const string &err)
+int queryPositiveInt(const char *query, const char *err)
 {
     while(7) {
         fputs(query, stdout);
@@ -50,7 +50,7 @@ int queryPositiveInt(const char *query, const string &err)
         memset((char *)input, 0, INPUT_BUFFER_SIZE);
         fgets((char *)input, INPUT_BUFFER_SIZE, stdin);
 
-
+        /*
         //if(strResult == "quit") return -1;
         // Need to check for invalid conversion of stoi()
         int result = stoi(strResult, nullptr);
@@ -62,6 +62,7 @@ int queryPositiveInt(const char *query, const string &err)
             continue;
         }
         return result;
+        */
     }
 }
 
