@@ -28,9 +28,15 @@ double calculateDiameter(int awg)
 }
 
 
-double calcArea(double diameter)
+double calcArea(double radius)
 {
-    return PI * pow(diameter / 2.0, 2);
+    return PI * pow(radius, 2);
+}
+
+
+double volumeCylinder(double radius, double length)
+{
+    return length * calcArea(radius);
 }
 
 
@@ -42,6 +48,6 @@ int main(int argc, char **argv)
     }
     fputc('\n', stdout);
     for(awg = 0; awg <= 36; awg++) {
-        printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg)));
+        printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg) / 2.0));
     }
 }
