@@ -8,9 +8,17 @@
 
 
 struct Material {
-    const double ATOMIC_MASS;
-    const int FREE_ELECTRONS_PER_ATOM;
-    const double VOLUMETRIC_DENSITY;
+    const double ATOMIC_MASS;           //g / mol
+    const int FREE_ELECTRONS_PER_ATOM;  //#
+    const double VOLUMETRIC_DENSITY;    //g / cm3
+};
+
+
+
+const struct Material COPPER = {
+    63.546,
+    1,
+    8.96
 };
 
 
