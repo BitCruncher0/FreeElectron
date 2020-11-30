@@ -4,11 +4,14 @@
 
 double calculateDiameter(int awg)
 {
-    return (double)0.127 * pow(92, (double)((36 - awg) / 39));
+    return 0.127 * pow(92, (36.0 - awg) / 39);
 }
 
 
 int main(int argc, char **argv)
 {
-    fputs("Hello, world!", stdout);
+    int awg;
+    for(awg = 0; awg <= 36; awg++) {
+        printf("%d: %.*F\n", awg, 3, calculateDiameter(awg));
+    }
 }
