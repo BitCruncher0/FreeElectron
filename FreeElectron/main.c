@@ -77,4 +77,7 @@ int main(int argc, char **argv)
     for(awg = 0; awg <= 36; awg++) {
         printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg) / 2.0));
     }
+    //1. Prompt for awg
+    //2. Prompt for length
+    //3. Give volume
 }
