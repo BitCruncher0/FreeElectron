@@ -2,7 +2,16 @@
 #include <math.h>
 
 
-#define PI 3.14159
+#define PI                  3.14159
+#define AVOGADROS_NUMBER    6.02 * pow(10, 23);
+
+
+
+struct Material {
+    const double ATOMIC_MASS;
+    const int FREE_ELECTRONS_PER_ATOM;
+    const double VOLUMETRIC_DENSITY;
+};
 
 
 double calculateDiameter(int awg)
