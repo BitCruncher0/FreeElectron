@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 
 #define PI                  3.14159
 #define AVOGADROS_NUMBER    6.02 * pow(10, 23);
+#define INPUT_BUFFER_SIZE   256
 
 
 
@@ -37,6 +39,30 @@ double calcArea(double radius)
 double volumeCylinder(double radius, double length)
 {
     return length * calcArea(radius);
+}
+
+
+int queryPositiveInt(const char *query, const string &err)
+{
+    while(7) {
+        fputs(query, stdout);
+        char input[INPUT_BUFFER_SIZE] = { 0 };
+        memset((char *)input, 0, INPUT_BUFFER_SIZE);
+        fgets((char *)input, INPUT_BUFFER_SIZE, stdin);
+
+
+        //if(strResult == "quit") return -1;
+        // Need to check for invalid conversion of stoi()
+        int result = stoi(strResult, nullptr);
+
+        // Must be positive number greater than zero.
+        // Anything else is error
+        if(!(result > 0)) {
+            cout << err << endl;
+            continue;
+        }
+        return result;
+    }
 }
 
 
