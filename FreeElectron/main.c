@@ -4,7 +4,7 @@
 
 double calculateDiameter(int awg)
 {
-
+    return (double)0.127 * pow(92, (double)((36 - awg) / 39));
 }
 
 
