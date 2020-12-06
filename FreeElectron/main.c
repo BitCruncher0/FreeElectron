@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define PRINT_DIAMETERS
-#define PRINT_AREAS
+//#define PRINT_DIAMETERS
+//#define PRINT_AREAS
 #define RUN_REAL_PROGRAM
 
 #define PI                  3.14159
@@ -15,10 +15,11 @@ double calculateDiameter(int);
 double calcArea(double);
 double volumeCylinder(double, double);
 char removeNewline(char *);
-long query_pos_long(const char *query, const char *err, const char *quit, char *req);
+long prompt_long(const char *show, const char *quit, char *req);
 char *prompt(const char *, char *, size_t);
 char promptQuit(const char *in, char *out, size_t buf_size, const char *quit);
 long int cstr_to_long(const char *, char *conversion_err);
+double prompt_double(const char *show, const char *quit, char *req);
 
 
 
@@ -37,7 +38,7 @@ const struct Material COPPER = {
     8.96
 };
 
-
+/* Returns diameter (in millimeters) of given AWG */
 double calculateDiameter(int awg)
 {
     return 0.127 * pow(92, (36.0 - awg) / 39);
@@ -85,18 +86,57 @@ int main(int argc, char **argv)
     /* PROGRAM FLOW
 
        1. Prompt for AWG
-       2. Prompt for length
+       2. Prompt for wire length
        3. Give volume */
 
     char request_exit;
+    long awg;
+    double radius;
+    double diameter;
+    double area;
+    double volume;
+    double length_in_mm;
 
-    long awg = query_pos_long(
-        "AWG? ",
-        "Not a valid AWG\n",
-        "",
-        &request_exit);
 
-    if(request_exit) return 0;
+    awg = -1;
+    while((awg < 0) || (awg > 36)) {
+        awg = prompt_long(
+            "AWG [0 - 36]? ",
+            "",
+            &request_exit);
+        if(request_exit) return 0;
+        /* 0 <= AWG <= 36 */
+        if((awg < 0) || (awg > 36)) {
+            fputs("Not a valid AWG\n", stdout);
+        }
+    }
+
+    length_in_mm = 0;
+    while(length_in_mm <= 0) {
+        length_in_mm = prompt_double(
+            "Wire length (mm) (0 - inf)? ",
+            "",
+            &request_exit);
+        if(request_exit) return 0;
+        /* 0 < Wire length */
+        if(length_in_mm <= 0) {
+            fputs("Not a valid wire length\n", stdout);
+        }
+    }
+    diameter = calculateDiameter(awg);
+    radius = diameter / 2.0;
+    area = calcArea(radius);
+    volume = volumeCylinder(radius, length_in_mm);
+    printf("AWG %li\n", awg);
+    printf(
+        "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
+        4,
+        radius,
+        4,
+        diameter,
+        4,
+        area);
+    printf("volume: %.*F mm^3\n", 4, volume);
 
 #endif
 }
@@ -118,9 +158,8 @@ char removeNewline(char *str)
     } return 1;
 }
 
-long query_pos_long(
+long prompt_long(
     const char *query,
-    const char *err,
     const char *quit,
     char *request_quit)
 {
@@ -137,13 +176,6 @@ long query_pos_long(
         long result = cstr_to_long(input, &conversion_error);
         if(conversion_error) {
             fputs("Invalid input\n", stdout);
-            continue;
-        }
-
-        /* Must be positive number greater than zero.
-           Anything else is error */
-        if(result <= 0) {
-            fputs(err, stdout);
             continue;
         }
 
@@ -169,4 +201,32 @@ long cstr_to_long(const char *str, char *conversion_err) {
     long result = strtol(str, &end, 10);
     *conversion_err = ((*end) == 0) ? 0 : 1;
     return result;
+}
+
+double cstr_to_double(const char *str, char *conversion_err) {
+    char *end;
+    double result = strtod(str, &end);
+    *conversion_err = ((*end) == 0) ? 0 : 1;
+    return result;
+}
+
+double prompt_double(const char *show, const char *quit, char *request_quit) {
+    while(1) {
+        char input[INPUT_BUFFER_SIZE + 1];
+        if(promptQuit(show, input, INPUT_BUFFER_SIZE + 1, quit)) {
+            *request_quit = 1;
+            return 0;
+        }
+        else *request_quit = 0;
+
+        /* Convert string to numerical */
+        char conversion_error;
+        double result = cstr_to_double(input, &conversion_error);
+        if(conversion_error) {
+            fputs("Invalid input\n", stdout);
+            continue;
+        }
+
+        return result;
+    }
 }
