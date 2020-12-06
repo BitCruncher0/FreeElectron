@@ -7,6 +7,7 @@
 //#define PRINT_AREAS
 #define RUN_REAL_PROGRAM
 
+#define PRECISION           3
 #define PI                  3.14159
 #define AVOGADROS_NUMBER    6.02 * pow(10, 23);
 #define INPUT_BUFFER_SIZE   255
@@ -20,6 +21,10 @@ char *prompt(const char *, char *, size_t);
 char promptQuit(const char *in, char *out, size_t buf_size, const char *quit);
 long int cstr_to_long(const char *, char *conversion_err);
 double prompt_double(const char *show, const char *quit, char *req);
+double mm3_to_cm3(double);
+double calc_moles(double mass, double molar_mass);
+double calc_num_atoms(double moles);
+double calc_free_electrons(double atoms, double free_elec_per_atom);
 
 
 
@@ -95,7 +100,12 @@ int main(int argc, char **argv)
     double diameter;
     double area;
     double volume;
+    double volume_in_cm3;
     double length_in_mm;
+    double mass_in_grams;
+    double moles;
+    double atoms;
+    double free_electrons;
 
 
     awg = -1;
@@ -130,14 +140,28 @@ int main(int argc, char **argv)
     printf("AWG %li\n", awg);
     printf(
         "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
-        4,
+        PRECISION,
         radius,
-        4,
+        PRECISION,
         diameter,
-        4,
+        PRECISION,
         area);
-    printf("volume: %.*F mm^3\n", 4, volume);
+    printf("volume: %.*F mm^3\n", PRECISION, volume);
 
+    volume_in_cm3 = mm3_to_cm3(volume);
+
+    /* mass = volume x density */
+    mass_in_grams = volume_in_cm3 * COPPER.VOLUMETRIC_DENSITY;
+    printf("mass: %.*F g\n", PRECISION, mass_in_grams);
+
+    moles = calc_moles(mass_in_grams, COPPER.ATOMIC_MASS);
+    printf("moles: %.*F mol\n", 2*PRECISION, moles);
+
+    atoms = calc_num_atoms(moles);
+    printf("atoms: %.*E atom\n", PRECISION, atoms);
+
+    free_electrons = calc_free_electrons(atoms, COPPER.FREE_ELECTRONS_PER_ATOM);
+    printf("free elec: %.*E elec\n", PRECISION, free_electrons);
 #endif
 }
 
@@ -229,4 +253,20 @@ double prompt_double(const char *show, const char *quit, char *request_quit) {
 
         return result;
     }
+}
+
+double mm3_to_cm3(double mm3) {
+    return mm3 / 1000.0;
+}
+
+double calc_moles(double mass, double molar_mass) {
+    return mass / molar_mass;
+}
+
+double calc_num_atoms(double moles) {
+    return moles * AVOGADROS_NUMBER;
+}
+
+double calc_free_electrons(double atoms, double free_elec_per_atom) {
+    return atoms * free_elec_per_atom;
 }
