@@ -1,11 +1,25 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
+#define PRINT_DIAMETERS
+#define PRINT_AREAS
+#define RUN_REAL_PROGRAM
 
 #define PI                  3.14159
 #define AVOGADROS_NUMBER    6.02 * pow(10, 23);
-#define INPUT_BUFFER_SIZE   256
+#define INPUT_BUFFER_SIZE   255
+
+double calculateDiameter(int);
+double calcArea(double);
+double volumeCylinder(double, double);
+char removeNewline(char *);
+long query_pos_long(const char *query, const char *err, const char *quit, char *req);
+char *prompt(const char *, char *, size_t);
+char promptQuit(const char *in, char *out, size_t buf_size, const char *quit);
+long int cstr_to_long(const char *, char *conversion_err);
+
 
 
 
@@ -42,42 +56,117 @@ double volumeCylinder(double radius, double length)
 }
 
 
-int queryPositiveInt(const char *query, const char *err)
+int main(int argc, char **argv)
 {
-    while(7) {
-        fputs(query, stdout);
-        char input[INPUT_BUFFER_SIZE] = { 0 };
-        memset((char *)input, 0, INPUT_BUFFER_SIZE);
-        fgets((char *)input, INPUT_BUFFER_SIZE, stdin);
+#ifdef PRINT_DIAMETERS
+    {
+        int awg;
+        for(awg = 0; awg <= 36; awg++) {
+            printf("%d: %.*F\n", awg, 3, calculateDiameter(awg));
+        }
+    }
+    fputc('\n', stdout);
+#endif
 
-        /*
-        //if(strResult == "quit") return -1;
-        // Need to check for invalid conversion of stoi()
-        int result = stoi(strResult, nullptr);
+#ifdef PRINT_AREAS
+    {
+        int awg;
+        for(awg = 0; awg <= 36; awg++) {
+            printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg) / 2.0));
+        }
+    }
+    fputc('\n', stdout);
+#endif
 
-        // Must be positive number greater than zero.
-        // Anything else is error
-        if(!(result > 0)) {
-            cout << err << endl;
+#ifdef RUN_REAL_PROGRAM
+    /* Todo
+       1. Prompt for radius instead of AWG */
+
+    /* PROGRAM FLOW
+
+       1. Prompt for AWG
+       2. Prompt for length
+       3. Give volume */
+
+    char request_exit;
+
+    long awg = query_pos_long(
+        "AWG? ",
+        "Not a valid AWG\n",
+        "",
+        &request_exit);
+
+    if(request_exit) return 0;
+
+#endif
+}
+
+/* Strips str of the newline character at the end
+
+   Returns 0 on successful removal or 1 or 0 if no newline
+   character is found
+
+   str points to a zero-terminated string */
+char removeNewline(char *str)
+{
+    int i;
+    for(i = 0; str[i] != 0; i++) {
+        if(str[i] == '\n') {
+            str[i] = 0;
+            return 0;
+        }
+    } return 1;
+}
+
+long query_pos_long(
+    const char *query,
+    const char *err,
+    const char *quit,
+    char *request_quit)
+{
+    while(1) {
+        char input[INPUT_BUFFER_SIZE + 1];
+        if(promptQuit(query, input, INPUT_BUFFER_SIZE + 1, quit)) {
+            *request_quit = 1;
+            return 0;
+        }
+        else *request_quit = 0;
+
+        /* Convert string to numerical */
+        char conversion_error;
+        long result = cstr_to_long(input, &conversion_error);
+        if(conversion_error) {
+            fputs("Invalid input\n", stdout);
             continue;
         }
+
+        /* Must be positive number greater than zero.
+           Anything else is error */
+        if(result <= 0) {
+            fputs(err, stdout);
+            continue;
+        }
+
         return result;
-        */
     }
 }
 
-
-int main(int argc, char **argv)
+char *prompt(const char *out, char *input_buffer, size_t buffer_size)
 {
-    int awg;
-    for(awg = 0; awg <= 36; awg++) {
-        printf("%d: %.*F\n", awg, 3, calculateDiameter(awg));
-    }
-    fputc('\n', stdout);
-    for(awg = 0; awg <= 36; awg++) {
-        printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg) / 2.0));
-    }
-    //1. Prompt for awg
-    //2. Prompt for length
-    //3. Give volume
+    fputs(out, stdout);          /* Print the prompt */
+    fgets(input_buffer, buffer_size, stdin);
+    removeNewline(input_buffer); /* fgets() includes the newline, so strip it */
+    return input_buffer;
+}
+
+char promptQuit(const char *out, char *in, size_t buf_size, const char *quit_str) {
+    if(strcmp(prompt(out, in, buf_size), quit_str)) return 0;
+    else return 1; /* user entered quit string */
+}
+
+long cstr_to_long(const char *str, char *conversion_err) {
+    char *end;
+    long result = strtol(str, &end, 10);
+    *conversion_err = ((*end) == 0) ? 0 : 1;
+    return result;
 }
