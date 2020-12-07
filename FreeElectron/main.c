@@ -9,7 +9,8 @@
 
 #define PRECISION           3
 #define PI                  3.14159
-#define AVOGADROS_NUMBER    6.02 * pow(10, 23);
+#define AVOGADROS_NUMBER    6.022 * pow(10, 23)
+#define ELECTRONIC_CHARGE   1.602 * pow(10, -19)
 #define INPUT_BUFFER_SIZE   255
 
 double calculateDiameter(int);
@@ -25,6 +26,7 @@ double mm3_to_cm3(double);
 double calc_moles(double mass, double molar_mass);
 double calc_num_atoms(double moles);
 double calc_free_electrons(double atoms, double free_elec_per_atom);
+double calc_charge(double num_electrons);
 
 
 
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
     double moles;
     double atoms;
     double free_electrons;
+    double free_charge;
 
 
     awg = -1;
@@ -162,6 +165,9 @@ int main(int argc, char **argv)
 
     free_electrons = calc_free_electrons(atoms, COPPER.FREE_ELECTRONS_PER_ATOM);
     printf("free elec: %.*E elec\n", PRECISION, free_electrons);
+
+    free_charge = calc_charge(free_electrons);
+    printf("free charge: %.*E C\n", 2*PRECISION, free_charge);
 #endif
 }
 
@@ -269,4 +275,8 @@ double calc_num_atoms(double moles) {
 
 double calc_free_electrons(double atoms, double free_elec_per_atom) {
     return atoms * free_elec_per_atom;
+}
+
+double calc_charge(double num_electrons) {
+    return num_electrons * ELECTRONIC_CHARGE;
 }
