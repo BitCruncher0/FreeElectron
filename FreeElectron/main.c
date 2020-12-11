@@ -27,6 +27,8 @@ double calc_moles(double mass, double molar_mass);
 double calc_num_atoms(double moles);
 double calc_free_electrons(double atoms, double free_elec_per_atom);
 double calc_charge(double num_electrons);
+double calc_carrier_density(double n, double volume);
+double calc_drift_speed(double current, double carr_density, double area);
 
 
 
@@ -109,6 +111,7 @@ int main(int argc, char **argv)
     double atoms;
     double free_electrons;
     double free_charge;
+    double carrier_density;
 
 
     awg = -1;
@@ -168,6 +171,12 @@ int main(int argc, char **argv)
 
     free_charge = calc_charge(free_electrons);
     printf("free charge: %.*E C\n", 2*PRECISION, free_charge);
+
+    carrier_density = free_electrons / volume;
+    printf("carrier density: %.*E elec/mm^3\n", PRECISION, carrier_density);
+
+    double drift_speed = calc_drift_speed(1.0, carrier_density, area);
+    printf("sdrift @ 1 A: %.*E mm/s\n", PRECISION, drift_speed);
 #endif
 }
 
@@ -278,5 +287,13 @@ double calc_free_electrons(double atoms, double free_elec_per_atom) {
 }
 
 double calc_charge(double num_electrons) {
-    return num_electrons * ELECTRONIC_CHARGE;
+    return num_electrons * -ELECTRONIC_CHARGE;
+}
+
+double calc_carrier_density(double particles, double volume) {
+    return particles / volume;
+}
+
+double calc_drift_speed(double current, double carr_density, double area) {
+    return current / (carr_density * ELECTRONIC_CHARGE * area);
 }
