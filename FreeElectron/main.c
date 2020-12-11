@@ -13,9 +13,9 @@
 #define ELECTRONIC_CHARGE   1.602 * pow(10, -19)
 #define INPUT_BUFFER_SIZE   255
 
-double calculateDiameter(int);
-double calcArea(double);
-double volumeCylinder(double, double);
+double calc_diameter(int AWG);
+double calc_area(double radius);
+double calc_volume_cylinder(double radius, double length);
 char removeNewline(char *);
 long prompt_long(const char *show, const char *quit, char *req);
 char *prompt(const char *, char *, size_t);
@@ -29,6 +29,8 @@ double calc_free_electrons(double atoms, double free_elec_per_atom);
 double calc_charge(double num_electrons);
 double calc_carrier_density(double n, double volume);
 double calc_drift_speed(double current, double carr_density, double area);
+void TEST_print_awg_diameters(void);
+void TEST_print_awg_areas(void);
 
 
 
@@ -47,47 +49,8 @@ const struct Material COPPER = {
     8.96
 };
 
-/* Returns diameter (in millimeters) of given AWG */
-double calculateDiameter(int awg)
-{
-    return 0.127 * pow(92, (36.0 - awg) / 39);
-}
-
-
-double calcArea(double radius)
-{
-    return PI * pow(radius, 2);
-}
-
-
-double volumeCylinder(double radius, double length)
-{
-    return length * calcArea(radius);
-}
-
-
 int main(int argc, char **argv)
 {
-#ifdef PRINT_DIAMETERS
-    {
-        int awg;
-        for(awg = 0; awg <= 36; awg++) {
-            printf("%d: %.*F\n", awg, 3, calculateDiameter(awg));
-        }
-    }
-    fputc('\n', stdout);
-#endif
-
-#ifdef PRINT_AREAS
-    {
-        int awg;
-        for(awg = 0; awg <= 36; awg++) {
-            printf("%d: %.*F\n", awg, 3, calcArea(calculateDiameter(awg) / 2.0));
-        }
-    }
-    fputc('\n', stdout);
-#endif
-
 #ifdef RUN_REAL_PROGRAM
     /* Todo
        1. Prompt for radius instead of AWG */
@@ -96,7 +59,7 @@ int main(int argc, char **argv)
 
        1. Prompt for AWG
        2. Prompt for wire length
-       3. Give volume */
+       3. Give statistics */
 
     char request_exit;
     long awg;
@@ -139,10 +102,10 @@ int main(int argc, char **argv)
             fputs("Not a valid wire length\n", stdout);
         }
     }
-    diameter = calculateDiameter(awg);
+    diameter = calc_diameter(awg);
     radius = diameter / 2.0;
-    area = calcArea(radius);
-    volume = volumeCylinder(radius, length_in_mm);
+    area = calc_area(radius);
+    volume = calc_volume_cylinder(radius, length_in_mm);
     printf("AWG %li\n", awg);
     printf(
         "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
@@ -270,6 +233,22 @@ double prompt_double(const char *show, const char *quit, char *request_quit) {
     }
 }
 
+/* Returns diameter (in millimeters) of given AWG */
+double calc_diameter(int awg)
+{
+    return 0.127 * pow(92, (36.0 - awg) / 39);
+}
+
+double calc_area(double radius)
+{
+    return PI * pow(radius, 2);
+}
+
+double calc_volume_cylinder(double radius, double length)
+{
+    return length * calc_area(radius);
+}
+
 double mm3_to_cm3(double mm3) {
     return mm3 / 1000.0;
 }
@@ -296,4 +275,22 @@ double calc_carrier_density(double particles, double volume) {
 
 double calc_drift_speed(double current, double carr_density, double area) {
     return current / (carr_density * ELECTRONIC_CHARGE * area);
+}
+
+void TEST_print_awg_diameters(void)
+{
+    int awg;
+    for(awg = 0; awg <= 36; awg++) {
+        printf("%d: %.*F\n", awg, 3, calc_diameter(awg));
+    }
+    fputc('\n', stdout);
+}
+
+void TEST_print_awg_areas(void)
+{
+    int awg;
+    for(awg = 0; awg <= 36; awg++) {
+        printf("%d: %.*F\n", awg, 3, calc_area(calc_diameter(awg) / 2.0));
+    }
+    fputc('\n', stdout);
 }
