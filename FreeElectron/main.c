@@ -19,7 +19,7 @@ double calc_volume_cylinder(double radius, double length);
 char removeNewline(char *);
 long prompt_long(const char *show, const char *quit, char *req);
 char *prompt(const char *, char *, size_t);
-char promptQuit(const char *in, char *out, size_t buf_size, const char *quit);
+char promptQuit(const char *out, char *in, size_t buf_size, const char *quit);
 long int cstr_to_long(const char *, char *conversion_err);
 double prompt_double(const char *show, const char *quit, char *req);
 double mm3_to_cm3(double);
@@ -193,26 +193,30 @@ char *prompt(const char *out, char *input_buffer, size_t buffer_size)
     return input_buffer;
 }
 
-char promptQuit(const char *out, char *in, size_t buf_size, const char *quit_str) {
+char promptQuit(const char *out, char *in, size_t buf_size, const char *quit_str)
+{
     if(strcmp(prompt(out, in, buf_size), quit_str)) return 0;
     else return 1; /* user entered quit string */
 }
 
-long cstr_to_long(const char *str, char *conversion_err) {
+long cstr_to_long(const char *str, char *conversion_err)
+{
     char *end;
     long result = strtol(str, &end, 10);
     *conversion_err = ((*end) == 0) ? 0 : 1;
     return result;
 }
 
-double cstr_to_double(const char *str, char *conversion_err) {
+double cstr_to_double(const char *str, char *conversion_err)
+{
     char *end;
     double result = strtod(str, &end);
     *conversion_err = ((*end) == 0) ? 0 : 1;
     return result;
 }
 
-double prompt_double(const char *show, const char *quit, char *request_quit) {
+double prompt_double(const char *show, const char *quit, char *request_quit)
+{
     while(1) {
         char input[INPUT_BUFFER_SIZE + 1];
         if(promptQuit(show, input, INPUT_BUFFER_SIZE + 1, quit)) {
