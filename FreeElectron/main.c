@@ -19,7 +19,7 @@ double calc_volume_cylinder(double radius, double length);
 char removeNewline(char *);
 long prompt_long(const char *show, const char *quit, char *req);
 char *prompt(const char *, char *, size_t);
-char promptQuit(const char *out, char *in, size_t buf_size, const char *quit);
+char prompt_quit(const char *out, char *in, size_t buf_size, const char *quit);
 long int cstr_to_long(const char *, char *conversion_err);
 double prompt_double(const char *show, const char *quit, char *req);
 double mm3_to_cm3(double);
@@ -27,7 +27,7 @@ double calc_moles(double mass, double molar_mass);
 double calc_num_atoms(double moles);
 double calc_free_electrons(double atoms, double free_elec_per_atom);
 double calc_charge(double num_electrons);
-double calc_carrier_density(double n, double volume);
+double calc_carrier_density(double particles, double volume);
 double calc_drift_speed(double current, double carr_density, double area);
 void TEST_print_awg_diameters(void);
 void TEST_print_awg_areas(void);
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     double area;
     double volume;
     double volume_in_cm3;
-    double length_in_mm;
+    double length;
     double mass_in_grams;
     double moles;
     double atoms;
@@ -79,33 +79,31 @@ int main(int argc, char **argv)
 
     awg = -1;
     while((awg < 0) || (awg > 36)) {
-        awg = prompt_long(
-            "AWG [0 - 36]? ",
-            "",
-            &request_exit);
+        awg = prompt_long("AWG [0 - 36]? ", "", &request_exit);
         if(request_exit) return 0;
+
         /* 0 <= AWG <= 36 */
         if((awg < 0) || (awg > 36)) {
             fputs("Not a valid AWG\n", stdout);
         }
     }
 
-    length_in_mm = 0;
-    while(length_in_mm <= 0) {
-        length_in_mm = prompt_double(
-            "Wire length (mm) (0 - inf)? ",
-            "",
-            &request_exit);
+    length = 0;
+    while(length <= 0) {
+        length =
+            prompt_double("Wire length (mm) (0 - inf)? ", "", &request_exit);
         if(request_exit) return 0;
+
         /* 0 < Wire length */
-        if(length_in_mm <= 0) {
+        if(length <= 0) {
             fputs("Not a valid wire length\n", stdout);
         }
     }
+
     diameter = calc_diameter(awg);
     radius = diameter / 2.0;
     area = calc_area(radius);
-    volume = calc_volume_cylinder(radius, length_in_mm);
+    volume = calc_volume_cylinder(radius, length);
     printf("AWG %li\n", awg);
     printf(
         "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
@@ -167,7 +165,7 @@ long prompt_long(
 {
     while(1) {
         char input[INPUT_BUFFER_SIZE + 1];
-        if(promptQuit(query, input, INPUT_BUFFER_SIZE + 1, quit)) {
+        if(prompt_quit(query, input, INPUT_BUFFER_SIZE + 1, quit)) {
             *request_quit = 1;
             return 0;
         }
@@ -185,18 +183,31 @@ long prompt_long(
     }
 }
 
+/* Prints out a prompt and allows the user to enter some
+   input.
+
+   Returns a pointer to the zero-terminated response.
+   The newline will be stripped. */
 char *prompt(const char *out, char *input_buffer, size_t buffer_size)
 {
-    fputs(out, stdout);          /* Print the prompt */
-    fgets(input_buffer, buffer_size, stdin);
-    removeNewline(input_buffer); /* fgets() includes the newline, so strip it */
+    fputs(out, stdout);             // Print the prompt
+    fgets(input_buffer, buffer_size, stdin); // Receive the response
+    removeNewline(input_buffer);
     return input_buffer;
 }
 
-char promptQuit(const char *out, char *in, size_t buf_size, const char *quit_str)
+/* Prints out a prompt and allows the user to enter some
+   input.
+
+   If the response is the same as quit_str, returns 1.
+   Returns 0 otherwise.
+
+   in will contain a pointer to the zero-terminated response.
+   The newline will be stripped. */
+char prompt_quit(const char *out, char *in, size_t buf_size, const char *quit_str)
 {
     if(strcmp(prompt(out, in, buf_size), quit_str)) return 0;
-    else return 1; /* user entered quit string */
+    else return 1;
 }
 
 long cstr_to_long(const char *str, char *conversion_err)
@@ -219,7 +230,7 @@ double prompt_double(const char *show, const char *quit, char *request_quit)
 {
     while(1) {
         char input[INPUT_BUFFER_SIZE + 1];
-        if(promptQuit(show, input, INPUT_BUFFER_SIZE + 1, quit)) {
+        if(prompt_quit(show, input, INPUT_BUFFER_SIZE + 1, quit)) {
             *request_quit = 1;
             return 0;
         }
