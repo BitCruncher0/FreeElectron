@@ -222,27 +222,24 @@ char removeNewline(char *str)
     } return 1;
 }
 
-long prompt_long(
-    const char *query,
-    const char *quit,
-    char *request_quit)
+long prompt_long(const char *msg, const char *quit_str, char *request_quit)
 {
     while(1) {
-        char input[INPUT_BUFFER_SIZE + 1];
-        if(prompt_quit(query, input, INPUT_BUFFER_SIZE + 1, quit)) {
+        char buf[INPUT_BUFFER_SIZE + 1];
+        if(prompt_quit(msg, buf, INPUT_BUFFER_SIZE + 1, quit_str)) {
             *request_quit = 1;
             return 0;
         }
-        else *request_quit = 0;
 
-        /* Convert string to numerical */
+        // Attempt to convert string to numerical
         char conversion_error;
-        long result = cstr_to_long(input, &conversion_error);
+        long result = cstr_to_long(buf, &conversion_error);
         if(conversion_error) {
             fputs("Invalid input\n", stdout);
             continue;
         }
 
+        *request_quit = 0;
         return result;
     }
 }
@@ -290,24 +287,24 @@ double cstr_to_double(const char *str, char *conversion_err)
     return result;
 }
 
-double prompt_double(const char *show, const char *quit, char *request_quit)
+double prompt_double(const char *msg, const char *quit_str, char *request_quit)
 {
     while(1) {
-        char input[INPUT_BUFFER_SIZE + 1];
-        if(prompt_quit(show, input, INPUT_BUFFER_SIZE + 1, quit)) {
+        char buf[INPUT_BUFFER_SIZE + 1];
+        if(prompt_quit(msg, buf, INPUT_BUFFER_SIZE + 1, quit_str)) {
             *request_quit = 1;
             return 0;
         }
-        else *request_quit = 0;
 
-        /* Convert string to numerical */
+        // Attempt to convert string to numerical
         char conversion_error;
-        double result = cstr_to_double(input, &conversion_error);
+        double result = cstr_to_double(buf, &conversion_error);
         if(conversion_error) {
             fputs("Invalid input\n", stdout);
             continue;
         }
 
+        *request_quit = 0;
         return result;
     }
 }
