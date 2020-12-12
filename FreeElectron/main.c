@@ -3,8 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#define PRINT_DIAMETERS
-//#define PRINT_AREAS
 #define RUN_REAL_PROGRAM
 
 #define PRECISION           3
@@ -31,6 +29,8 @@ double calc_carrier_density(double particles, double volume);
 double calc_drift_speed(double current, double carr_density, double area);
 void TEST_print_awg_diameters(void);
 void TEST_print_awg_areas(void);
+int get_awg(char *quit);
+double get_length(char *quit);
 
 
 
@@ -43,11 +43,13 @@ struct Material {
 
 
 
-const struct Material COPPER = {
-    63.546,
-    1,
-    8.96
-};
+struct Material *prompt_material(char *quit);
+struct Material *str_to_material(const char *);
+
+const struct Material COPPER = { 63.546, 1, 8.96 };
+const struct Material CARBON = { 12.011, 1, 2.26 };
+
+const struct Material NULL_MATERIAL = { 0, 0, 0 };
 
 int main(int argc, char **argv)
 {
@@ -59,86 +61,126 @@ int main(int argc, char **argv)
 
        1. Prompt for AWG
        2. Prompt for wire length
-       3. Give statistics */
+       3. Give statistics
 
-    char request_exit;
-    long awg;
-    double radius;
-    double diameter;
-    double area;
-    double volume;
-    double volume_in_cm3;
-    double length;
-    double mass_in_grams;
-    double moles;
-    double atoms;
-    double free_electrons;
-    double free_charge;
-    double carrier_density;
+       To quit, press enter at prompts */
 
+    while(1) {
+        char request_exit;
 
-    awg = -1;
-    while((awg < 0) || (awg > 36)) {
-        awg = prompt_long("AWG [0 - 36]? ", "", &request_exit);
+        const struct Material *material = prompt_material(&request_exit);
         if(request_exit) return 0;
+
+        int awg = get_awg(&request_exit);
+        if(request_exit) return 0;
+
+        double length = get_length(&request_exit);
+        if(request_exit) return 0;
+
+        double diameter = calc_diameter(awg);
+        double radius = diameter / 2.0;
+        double area = calc_area(radius);
+        double volume = calc_volume_cylinder(radius, length);
+        double volume_in_cm3 = mm3_to_cm3(volume);
+
+        // mass = density x volume
+        double mass_in_grams =
+            material->VOLUMETRIC_DENSITY * volume_in_cm3;
+
+        // moles = mass / molar mass
+        double moles =
+            mass_in_grams / material->ATOMIC_MASS;
+
+        double atoms = AVOGADROS_NUMBER * moles;
+
+        double free_electrons =
+            material->FREE_ELECTRONS_PER_ATOM * atoms;
+
+        double free_charge = free_electrons * -ELECTRONIC_CHARGE;
+        double carrier_density = free_electrons / volume;
+        double drift_speed = calc_drift_speed(1.0, carrier_density, area);
+
+
+        printf("AWG %i\n", awg);
+        printf(
+            "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
+            PRECISION,
+            radius,
+            PRECISION,
+            diameter,
+            PRECISION,
+            area);
+        printf("volume: %.*F mm^3\n", PRECISION, volume);
+        printf("mass: %.*F g\n", PRECISION, mass_in_grams);
+        printf("moles: %.*F mol\n", 2 * PRECISION, moles);
+        printf("atoms: %.*E atom\n", PRECISION, atoms);
+        printf("free elec: %.*E elec\n", PRECISION, free_electrons);
+        printf("free charge: %.*E C\n", 2 * PRECISION, free_charge);
+        printf("carrier density: %.*E elec/mm^3\n", PRECISION, carrier_density);
+        printf("sdrift @ 1 A: %.*E mm/s\n", PRECISION, drift_speed);
+
+        fputc('\n', stdout);
+    }
+#endif
+}
+
+struct Material *prompt_material(char *quit)
+{
+    while(1) {
+        char buf[INPUT_BUFFER_SIZE + 1];
+        if(prompt_quit("Material? ", buf, INPUT_BUFFER_SIZE + 1, "")) {
+            *quit = 1;
+            return &NULL_MATERIAL;
+        }
+        struct Material *p_mat = str_to_material(buf);
+        if(p_mat == &NULL_MATERIAL) {
+            fputs("Not a valid material\n", stdout);
+        }
+        else {
+            *quit = 0;
+            return p_mat;
+        }
+    }
+}
+
+struct Material *str_to_material(const char *str)
+{
+    if(!strcmp(str, "copper")) return &COPPER;
+    else if(!strcmp(str, "carbon")) return &CARBON;
+    else return &NULL_MATERIAL;
+}
+
+int get_awg(char *quit)
+{
+    long awg = -1;
+    while((awg < 0) || (awg > 36)) {
+        awg = prompt_long("AWG [0 - 36]? ", "", quit);
+        if(*quit) return 0;
 
         /* 0 <= AWG <= 36 */
         if((awg < 0) || (awg > 36)) {
             fputs("Not a valid AWG\n", stdout);
         }
     }
+    *quit = 0;
+    return (int)awg;
+}
 
-    length = 0;
+double get_length(char *quit)
+{
+    double length = 0;
     while(length <= 0) {
         length =
-            prompt_double("Wire length (mm) (0 - inf)? ", "", &request_exit);
-        if(request_exit) return 0;
+            prompt_double("Wire length (mm) (0 - inf)? ", "", quit);
+        if(*quit) return 0;
 
         /* 0 < Wire length */
         if(length <= 0) {
             fputs("Not a valid wire length\n", stdout);
         }
     }
-
-    diameter = calc_diameter(awg);
-    radius = diameter / 2.0;
-    area = calc_area(radius);
-    volume = calc_volume_cylinder(radius, length);
-    printf("AWG %li\n", awg);
-    printf(
-        "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
-        PRECISION,
-        radius,
-        PRECISION,
-        diameter,
-        PRECISION,
-        area);
-    printf("volume: %.*F mm^3\n", PRECISION, volume);
-
-    volume_in_cm3 = mm3_to_cm3(volume);
-
-    /* mass = volume x density */
-    mass_in_grams = volume_in_cm3 * COPPER.VOLUMETRIC_DENSITY;
-    printf("mass: %.*F g\n", PRECISION, mass_in_grams);
-
-    moles = calc_moles(mass_in_grams, COPPER.ATOMIC_MASS);
-    printf("moles: %.*F mol\n", 2*PRECISION, moles);
-
-    atoms = calc_num_atoms(moles);
-    printf("atoms: %.*E atom\n", PRECISION, atoms);
-
-    free_electrons = calc_free_electrons(atoms, COPPER.FREE_ELECTRONS_PER_ATOM);
-    printf("free elec: %.*E elec\n", PRECISION, free_electrons);
-
-    free_charge = calc_charge(free_electrons);
-    printf("free charge: %.*E C\n", 2*PRECISION, free_charge);
-
-    carrier_density = free_electrons / volume;
-    printf("carrier density: %.*E elec/mm^3\n", PRECISION, carrier_density);
-
-    double drift_speed = calc_drift_speed(1.0, carrier_density, area);
-    printf("sdrift @ 1 A: %.*E mm/s\n", PRECISION, drift_speed);
-#endif
+    *quit = 0;
+    return length;
 }
 
 /* Strips str of the newline character at the end
