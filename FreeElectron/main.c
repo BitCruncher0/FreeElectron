@@ -48,7 +48,8 @@ struct Material *prompt_material(char *quit);
 struct Material *str_to_material(const char *);
 
 const struct Material COPPER = { "copper", 63.546, 1, 8.96 };
-const struct Material CARBON = { "carbon", 12.011, 1, 2.26 };
+const struct Material ALUMINIUM = { "aluminium", 26.982, 3, 2.7 };
+const struct Material GOLD = { "gold", 196.97, 1, 19.3 };
 
 const struct Material NULL_MATERIAL = { "null_material", 0, 0, 0 };
 
@@ -147,7 +148,8 @@ struct Material *prompt_material(char *quit)
 struct Material *str_to_material(const char *str)
 {
     if(!strcmp(str, "copper")) return &COPPER;
-    else if(!strcmp(str, "carbon")) return &CARBON;
+    else if(!strcmp(str, "aluminium")) return &ALUMINIUM;
+    else if(!strcmp(str, "gold")) return &GOLD;
     else return &NULL_MATERIAL;
 }
 
