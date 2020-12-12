@@ -47,11 +47,29 @@ struct Material {
 struct Material *prompt_material(char *quit);
 struct Material *str_to_material(const char *);
 
-const struct Material COPPER = { "copper", 63.546, 1, 8.96 };
-const struct Material ALUMINIUM = { "aluminium", 26.982, 3, 2.7 };
-const struct Material GOLD = { "gold", 196.97, 1, 19.3 };
+const struct Material COPPER = {
+    "copper",
+    63.546,
+    1,
+    8.96 };
 
-const struct Material NULL_MATERIAL = { "null_material", 0, 0, 0 };
+const struct Material ALUMINIUM = {
+    "aluminium",
+    26.982,
+    3,
+    2.7 };
+
+const struct Material GOLD = {
+    "gold",
+    196.97,
+    1,
+    19.3 };
+
+const struct Material NULL_MATERIAL = {
+    "null_material",
+    0,
+    0,
+    0 };
 
 int main(int argc, char **argv)
 {
@@ -102,6 +120,7 @@ int main(int argc, char **argv)
         double carrier_density = free_electrons / volume;
         double drift_speed = calc_drift_speed(1.0, carrier_density, area);
 
+        fputc('\n', stdout);
 
         printf("%i AWG %s\n", awg, material->NAME);
         printf(
