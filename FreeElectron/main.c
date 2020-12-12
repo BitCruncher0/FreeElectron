@@ -29,8 +29,8 @@ double calc_carrier_density(double particles, double volume);
 double calc_drift_speed(double current, double carr_density, double area);
 void TEST_print_awg_diameters(void);
 void TEST_print_awg_areas(void);
-int get_awg(char *quit);
-double get_length(char *quit);
+int prompt_awg(char *quit);
+double prompt_length(char *quit);
 
 
 
@@ -91,10 +91,10 @@ int main(int argc, char **argv)
         const struct Material *material = prompt_material(&request_exit);
         if(request_exit) return 0;
 
-        int awg = get_awg(&request_exit);
+        int awg = prompt_awg(&request_exit);
         if(request_exit) return 0;
 
-        double length = get_length(&request_exit);
+        double length = prompt_length(&request_exit);
         if(request_exit) return 0;
 
         double diameter = calc_diameter(awg);
@@ -172,37 +172,38 @@ struct Material *str_to_material(const char *str)
     else return &NULL_MATERIAL;
 }
 
-int get_awg(char *quit)
+int prompt_awg(char *quit)
 {
-    long awg = -1;
-    while((awg < 0) || (awg > 36)) {
-        awg = prompt_long("AWG [0 - 36]? ", "", quit);
+    while(1) {
+        long awg = prompt_long("AWG [0 - 36]? ", "", quit);
         if(*quit) return 0;
 
         /* 0 <= AWG <= 36 */
         if((awg < 0) || (awg > 36)) {
             fputs("Not a valid AWG\n", stdout);
+            continue;
         }
+
+        *quit = 0;
+        return (int)awg;
     }
-    *quit = 0;
-    return (int)awg;
 }
 
-double get_length(char *quit)
+double prompt_length(char *quit)
 {
-    double length = 0;
-    while(length <= 0) {
-        length =
-            prompt_double("Wire length (mm) (0 - inf)? ", "", quit);
+    while(1) {
+        double length = prompt_double("Wire length (mm) (0 - inf)? ", "", quit);
         if(*quit) return 0;
 
         /* 0 < Wire length */
         if(length <= 0) {
             fputs("Not a valid wire length\n", stdout);
+            continue;
         }
+
+        *quit = 0;
+        return length;
     }
-    *quit = 0;
-    return length;
 }
 
 /* Strips str of the newline character at the end
