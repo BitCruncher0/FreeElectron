@@ -39,8 +39,8 @@ struct Material {
 
 
 
-struct Material *prompt_material(char *quit);
-struct Material *str_to_material(const char *);
+const struct Material *prompt_material(char *quit);
+const struct Material *str_to_material(const char *);
 
 const struct Material COPPER = {
     "copper",
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 #endif
 }
 
-struct Material *prompt_material(char *quit)
+const struct Material *prompt_material(char *quit)
 {
     while(1) {
         fputs("Materials list\n", stdout);
@@ -158,7 +158,7 @@ struct Material *prompt_material(char *quit)
             *quit = 1;
             return &NULL_MATERIAL;
         }
-        struct Material *p_mat = str_to_material(buf);
+        const struct Material *p_mat = str_to_material(buf);
         if(p_mat == &NULL_MATERIAL) {
             fputs("Not a valid material\n\n", stdout);
         }
@@ -169,7 +169,7 @@ struct Material *prompt_material(char *quit)
     }
 }
 
-struct Material *str_to_material(const char *str)
+const struct Material *str_to_material(const char *str)
 {
     if(!strcmp(str, "copper")) return &COPPER;
     else if(!strcmp(str, "aluminium")) return &ALUMINIUM;
