@@ -149,6 +149,10 @@ int main(int argc, char **argv)
 struct Material *prompt_material(char *quit)
 {
     while(1) {
+        fputs("Materials list\n", stdout);
+        fputs("1. copper\n", stdout);
+        fputs("2. aluminium\n", stdout);
+        fputs("3. gold\n\n", stdout);
         char buf[INPUT_BUFFER_SIZE + 1];
         if(prompt_quit("Material? ", buf, INPUT_BUFFER_SIZE + 1, "")) {
             *quit = 1;
@@ -156,7 +160,7 @@ struct Material *prompt_material(char *quit)
         }
         struct Material *p_mat = str_to_material(buf);
         if(p_mat == &NULL_MATERIAL) {
-            fputs("Not a valid material\n", stdout);
+            fputs("Not a valid material\n\n", stdout);
         }
         else {
             *quit = 0;
@@ -181,7 +185,7 @@ int prompt_awg(char *quit)
 
         /* 0 <= AWG <= 36 */
         if((awg < 0) || (awg > 36)) {
-            fputs("Not a valid AWG\n", stdout);
+            fputs("Not a valid AWG\n\n", stdout);
             continue;
         }
 
@@ -198,7 +202,7 @@ double prompt_length(char *quit)
 
         /* 0 < Wire length */
         if(length <= 0) {
-            fputs("Not a valid wire length\n", stdout);
+            fputs("Not a valid wire length\n\n", stdout);
             continue;
         }
 
@@ -237,7 +241,7 @@ long prompt_long(const char *msg, const char *quit_str, char *request_quit)
         char conversion_error;
         long result = cstr_to_long(buf, &conversion_error);
         if(conversion_error) {
-            fputs("Invalid input\n", stdout);
+            fputs("Invalid input\n\n", stdout);
             continue;
         }
 
@@ -302,7 +306,7 @@ double prompt_double(const char *msg, const char *quit_str, char *request_quit)
         char conversion_error;
         double result = cstr_to_double(buf, &conversion_error);
         if(conversion_error) {
-            fputs("Invalid input\n", stdout);
+            fputs("Invalid input\n\n", stdout);
             continue;
         }
 
