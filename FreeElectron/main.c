@@ -36,6 +36,7 @@ double get_length(char *quit);
 
 
 struct Material {
+    const char *NAME;
     const double ATOMIC_MASS;           //g / mol
     const int FREE_ELECTRONS_PER_ATOM;  //#
     const double VOLUMETRIC_DENSITY;    //g / cm3
@@ -46,10 +47,10 @@ struct Material {
 struct Material *prompt_material(char *quit);
 struct Material *str_to_material(const char *);
 
-const struct Material COPPER = { 63.546, 1, 8.96 };
-const struct Material CARBON = { 12.011, 1, 2.26 };
+const struct Material COPPER = { "copper", 63.546, 1, 8.96 };
+const struct Material CARBON = { "carbon", 12.011, 1, 2.26 };
 
-const struct Material NULL_MATERIAL = { 0, 0, 0 };
+const struct Material NULL_MATERIAL = { "null_material", 0, 0, 0 };
 
 int main(int argc, char **argv)
 {
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
         double drift_speed = calc_drift_speed(1.0, carrier_density, area);
 
 
-        printf("AWG %i\n", awg);
+        printf("%i AWG %s\n", awg, material->NAME);
         printf(
             "radius: %.*F mm\tdia: %.*F mm\tarea: %.*F mm^2\n",
             PRECISION,
