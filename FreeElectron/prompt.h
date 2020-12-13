@@ -26,3 +26,12 @@ char prompt_quit(
    and returns the long value. */
 long prompt_long(const char *msg, const char *quit_str, char *req);
 double prompt_double(const char *msg, const char *quit_str, char *req);
+
+/* Strips str of the newline character at the end.
+
+   Returns 0 on successful removal or 1 if no newline
+   character is found.
+
+   str points to a zero-terminated string that contains at most one
+   newline character. */
+char removeNewline(char *str);
